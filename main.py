@@ -16,13 +16,13 @@ def MNIST_loaders(train_batch_size=50000, test_batch_size=10000):
 
     train_loader = DataLoader(
         MNIST('./data/', train=True,
-              download=True,
+              download=False,
               transform=transform),
         batch_size=train_batch_size, shuffle=True)
 
     test_loader = DataLoader(
         MNIST('./data/', train=False,
-              download=True,
+              download=False,
               transform=transform),
         batch_size=test_batch_size, shuffle=False)
 
@@ -50,11 +50,11 @@ class Net(torch.nn.Module):
             h = overlay_y_on_x(x, label)
             goodness = []
             for layer in self.layers:
-                h = layer(h)
-                goodness += [h.pow(2).mean(1)]
-            goodness_per_label += [sum(goodness).unsqueeze(1)]
-        goodness_per_label = torch.cat(goodness_per_label, 1)
-        return goodness_per_label.argmax(1)
+                h = layer(h) # [50000, 500]
+                goodness += [h.pow(2).mean(1)] # list 2: [50000]
+            goodness_per_label += [sum(goodness).unsqueeze(1)] # list 10: [50000, 1]
+        goodness_per_label = torch.cat(goodness_per_label, 1) # [50000, 10]
+        return goodness_per_label.argmax(1) # [50000]
 
     def train(self, x_pos, x_neg):
         h_pos, h_neg = x_pos, x_neg
